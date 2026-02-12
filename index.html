@@ -3,52 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mis Rutas Pro - Cloud</title>
-    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js"></script>
-    
+    <title>Mis Rutas Pro - Firebase Sync</title>
     <style>
         :root { --primary: #3498db; --bg: #f4f7f6; --text: #2c3e50; --danger: #e74c3c; --success: #2ecc71; --dark: #34495e; }
         body { font-family: -apple-system, system-ui, sans-serif; background-color: var(--bg); margin: 0; color: var(--text); }
+        
         .screen { display: none; padding: 20px; box-sizing: border-box; min-height: 100vh; }
         .active { display: block; }
+
         .top-bar { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn-top { flex: 1; padding: 12px 2px; border-radius: 12px; border: none; background: white; color: var(--dark); font-size: 11px; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; }
+
         .map-container { width: 100%; height: 480px; border-radius: 20px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); background: #e5e3df; border: 2px solid white; }
         .map-container iframe { width: 100%; height: 100%; border: none; }
-        .btn-mapa-url { width: 100%; padding: 20px; background: #34495e; color: white; border: none; border-radius: 15px; font-weight: bold; margin: 15px 0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .trip-card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; }
+
+        .btn-mapa-url {
+            width: 100%; padding: 20px; background: #34495e; color: white;
+            border: none; border-radius: 15px; font-weight: bold; margin: 15px 0;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .trip-card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .card-header { display: flex; align-items: center; margin-bottom: 12px; }
         .thumb { width: 60px; height: 60px; border-radius: 15px; object-fit: cover; margin-right: 12px; border: 2px solid #fff; flex-shrink: 0; }
         .card-info { flex-grow: 1; }
         .card-title { font-weight: bold; font-size: 1.1rem; display: block; }
         .card-meta { font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+
         .forecast-container { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px; border-radius: 15px; margin-top: 10px; border: 1px solid #eee; }
         .forecast-day { text-align: center; font-size: 0.7rem; }
         .forecast-icon { font-size: 1.2rem; display: block; margin-bottom: 2px; }
         .forecast-temp { font-weight: bold; color: var(--dark); }
+
         #preview-img { width: 180px; height: 180px; border-radius: 35px; object-fit: cover; border: 6px solid white; box-shadow: 0 8px 25px rgba(0,0,0,0.15); background: #ddd; }
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 0.75rem; color: #7f8c8d; text-transform: uppercase; }
         input, textarea { width: 100%; margin-top: 5px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        
         .url-group { display: flex; gap: 5px; margin-top: 8px; }
         .btn-action { width: 40px; height: 40px; border: none; border-radius: 10px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
         .coords-box { background: #fff; padding: 15px; border-radius: 15px; border: 1px dashed var(--primary); margin-top: 15px; }
         .add-btn-main { position: fixed; bottom: 30px; right: 30px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; font-size: 35px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); z-index: 10; }
-        .status-cloud { font-size: 10px; text-align: center; padding: 5px; color: #95a5a6; }
     </style>
 </head>
 <body>
 
 <div id="list-screen" class="screen active">
-    <div class="status-cloud">☁️ Sincronizado con Firebase</div>
     <div class="top-bar">
-        <button class="btn-top" onclick="exportJSON()">📤 Exportar</button>
-        <button class="btn-top" onclick="document.getElementById('import-input').click()">📥 Importar</button>
-        <input type="file" id="import-input" style="display:none" onchange="importJSON(this)">
+        <button class="btn-top" onclick="exportJSON()">📤 Exportar JSON</button>
+        <button class="btn-top" onclick="document.getElementById('import-input').click()">📥 Importar JSON</button>
+        <input type="file" id="import-input" style="display:none" onchange="importToFirebase(this)">
     </div>
 
     <div class="map-container">
-        <iframe src="https://maps.google.com/maps?q=40.4167,-3.7037&z=6&output=embed" id="main-map-iframe"></iframe>
+        <iframe src="https://www.google.com/maps/d/u/0/embed?mid=1Ioij10Ybb9U76MNAZp3PrwoD87QBY_8&ehbc=2E312F" width="640" height="480"></iframe>
     </div>
 
     <h1>🌍 Mis Rutas Cloud</h1>
@@ -67,16 +75,17 @@
     </button>
 
     <div style="text-align:center;">
-        <img id="preview-img" src="" onclick="document.getElementById('file-input').click()">
+        <img id="preview-img" src="" onclick="document.getElementById('file-input').click()" style="cursor:pointer">
         <input type="file" id="file-input" style="display:none" accept="image/*" onchange="handleFile(this)">
     </div>
     
     <label>Nombre de la Ruta</label><input type="text" id="edit-title">
     
     <div class="coords-box">
+        <p style="margin:0; font-size:0.7rem; color:var(--primary)">Admite: 41.234888°, -3.349448°</p>
         <div style="display:flex; gap:10px;">
-            <div style="flex:1;"><label>Latitud</label><input type="text" id="edit-lat" placeholder="40.41"></div>
-            <div style="flex:1;"><label>Longitud</label><input type="text" id="edit-lon" placeholder="-3.70"></div>
+            <div style="flex:1;"><label>Latitud</label><input type="text" id="edit-lat" placeholder="40.41°"></div>
+            <div style="flex:1;"><label>Longitud</label><input type="text" id="edit-lon" placeholder="-3.70°"></div>
         </div>
     </div>
 
@@ -95,38 +104,42 @@
     <input type="hidden" id="edit-index">
 </div>
 
-<script>
-    // 1. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // Configuración con tus datos reales
     const firebaseConfig = {
-    apiKey: "AIzaSyCDvgv6A8ugOmfgX9jKiCp_0ccyomxYOk0",
-    authDomain: "rutas-e051f.firebaseapp.com",
-    projectId: "rutas-e051f",
-    storageBucket: "rutas-e051f.firebasestorage.app",
-    messagingSenderId: "263100723365",
-    appId: "1:263100723365:web:2e97eec355c1cd9518dd4c"
+        apiKey: "AIzaSyCDvgv6A8ugOmfgX9jKiCp_0ccyomxYOk0",
+        authDomain: "rutas-e051f.firebaseapp.com",
+        databaseURL: "https://rutas-e051f-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "rutas-e051f",
+        storageBucket: "rutas-e051f.firebasestorage.app",
+        messagingSenderId: "263100723365",
+        appId: "1:263100723365:web:2e97eec355c1cd9518dd4c"
     };
 
-    // 2. Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const tripsRef = ref(db, 'rutas');
 
     let trips = [];
     let currentBase64 = "";
 
-    // 3. Escuchar cambios en tiempo real
-    db.ref('rutas').on('value', (snapshot) => {
+    // Sincronización en tiempo real
+    onValue(tripsRef, (snapshot) => {
         const data = snapshot.val();
-        trips = data ? Object.values(data) : [];
+        trips = data ? Object.entries(data).map(([id, value]) => ({ firebaseId: id, ...value })) : [];
         renderTrips();
     });
 
-    function getWeatherEmoji(code) {
+    window.getWeatherEmoji = function(code) {
         if (code <= 1) return "☀️"; if (code <= 3) return "⛅"; if (code <= 48) return "🌫️";
         if (code <= 67) return "🌧️"; if (code <= 77) return "❄️"; if (code <= 82) return "🌦️";
         if (code <= 99) return "⛈️"; return "❓";
     }
 
-    async function loadWeeklyWeather(lat, lon, containerId) {
+    window.loadWeeklyWeather = async function(lat, lon, containerId) {
         const cleanLat = lat.toString().replace('°','').trim();
         const cleanLon = lon.toString().replace('°','').trim();
         if (!cleanLat || !cleanLon) return;
@@ -134,7 +147,7 @@
             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cleanLat}&longitude=${cleanLon}&daily=weathercode,temperature_2m_max&timezone=auto`);
             const data = await res.json();
             const container = document.getElementById(containerId);
-            if(!container) return;
+            if (!container) return;
             container.innerHTML = '';
             const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             data.daily.time.forEach((dateStr, i) => {
@@ -149,20 +162,20 @@
         } catch (e) { console.error("Error clima"); }
     }
 
-    function renderTrips() {
+    window.renderTrips = function() {
         const container = document.getElementById('trips-container');
-        container.innerHTML = trips.length ? '' : '<p style="text-align:center; color:gray;">Sin rutas en la nube.</p>';
+        container.innerHTML = trips.length ? '' : '<p style="text-align:center; color:gray;">No hay rutas en la nube.</p>';
         trips.forEach((t, i) => {
             const forecastId = `forecast-${i}`;
             container.innerHTML += `
                 <div class="trip-card">
                     <div class="card-header" onclick="openDetails(${i})">
-                        <img src="${t.img || 'https://via.placeholder.com/60'}" class="thumb">
+                        <img src="${t.img || ''}" class="thumb" onerror="this.src='https://via.placeholder.com/60'">
                         <div class="card-info">
                             <span class="card-title">${t.title}</span>
                             <div class="card-meta">📍 ${t.provincia || '--'} • 🚗 ${t.km || 0} km</div>
                         </div>
-                        <button onclick="event.stopPropagation(); deleteTrip(${i})" style="border:none; background:none; color:var(--danger); font-size:18px;">🗑️</button>
+                        <button onclick="event.stopPropagation(); deleteTrip('${t.firebaseId}')" style="border:none; background:none; color:#ffbcbc; font-size:18px;">🗑️</button>
                     </div>
                     <div class="forecast-container" id="${forecastId}">
                         <small style="color:#ccc">Cargando clima...</small>
@@ -173,7 +186,7 @@
         });
     }
 
-    function saveTrip() {
+    window.saveTrip = function() {
         const title = document.getElementById('edit-title').value;
         if (!title) return;
 
@@ -186,9 +199,7 @@
             lonVal = parts[1];
         }
 
-        const u = Array.from(document.querySelectorAll('.trip-url')).map(i => i.value).filter(v => v.trim() !== "");
         const data = { 
-            id: Date.now().toString(), // ID único para Firebase
             title, 
             lat: latVal.toString().replace('°','').trim(), 
             lon: lonVal.toString().replace('°','').trim(),
@@ -196,48 +207,24 @@
             km: document.getElementById('edit-km').value,
             mapCode: document.getElementById('edit-map-code').value, 
             notes: document.getElementById('edit-notes').value,
-            urls: u, 
+            urls: Array.from(document.querySelectorAll('.trip-url')).map(i => i.value).filter(v => v.trim() !== ""), 
             img: currentBase64 
         };
 
         const idx = document.getElementById('edit-index').value;
-        
         if(idx === "new") {
-            trips.push(data);
+            push(tripsRef, data);
         } else {
-            trips[idx] = data;
+            set(ref(db, 'rutas/' + trips[idx].firebaseId), data);
         }
-
-        // GUARDAR EN FIREBASE
-        db.ref('rutas').set(trips).then(() => {
-            showList();
-        });
+        showList();
     }
 
-    function deleteTrip(i) {
-        if(confirm("¿Borrar permanentemente de la nube?")) {
-            trips.splice(i,1);
-            db.ref('rutas').set(trips);
-        }
+    window.deleteTrip = function(fId) {
+        if(confirm("¿Borrar permanentemente?")) remove(ref(db, 'rutas/' + fId));
     }
 
-    // --- FUNCIONES DE INTERFAZ ---
-    function showList() { document.getElementById('detail-screen').classList.remove('active'); document.getElementById('list-screen').classList.add('active'); }
-    function toggleMapButton(val) { document.getElementById('btn-open-map').style.display = (val && val.trim() !== "") ? "flex" : "none"; }
-    function openExternalMap() { const url = document.getElementById('edit-map-code').value; if(url) window.open(url.startsWith('http') ? url : 'https://' + url, '_blank'); }
-    function handleFile(i) { const r = new FileReader(); r.onload = (e) => { currentBase64 = e.target.result; document.getElementById('preview-img').src = currentBase64; }; r.readAsDataURL(i.files[0]); }
-    function addUrlField(v = '') {
-        const c = document.getElementById('urls-container');
-        const d = document.createElement('div');
-        d.className = 'url-group';
-        d.innerHTML = `<input type="url" class="trip-url" value="${v}" style="flex:1">
-            <button class="btn-action" style="background:var(--primary)" onclick="window.open(this.previousSibling.previousSibling.value)">➜</button>
-            <button class="btn-action" style="background:var(--danger)" onclick="this.parentElement.remove()">✕</button>
-            <button class="btn-action" style="background:var(--success)" onclick="addUrlField()">+</button>`;
-        c.appendChild(d);
-    }
-
-    function openDetails(idx) {
+    window.openDetails = function(idx) {
         document.getElementById('list-screen').classList.remove('active');
         document.getElementById('detail-screen').classList.add('active');
         document.getElementById('urls-container').innerHTML = '';
@@ -260,6 +247,9 @@
             document.getElementById('edit-title').value = "";
             document.getElementById('edit-lat').value = "";
             document.getElementById('edit-lon').value = "";
+            document.getElementById('edit-provincia').value = "";
+            document.getElementById('edit-km').value = "";
+            document.getElementById('edit-notes').value = "";
             document.getElementById('edit-map-code').value = "";
             document.getElementById('preview-img').src = "";
             currentBase64 = "";
@@ -268,23 +258,36 @@
         }
     }
 
-    function exportJSON() {
-        const b = new Blob([JSON.stringify(trips, null, 2)], {type:"application/json"});
+    window.showList = () => { document.getElementById('detail-screen').classList.remove('active'); document.getElementById('list-screen').classList.add('active'); }
+    window.handleFile = (i) => { const r = new FileReader(); r.onload = (e) => { currentBase64 = e.target.result; document.getElementById('preview-img').src = currentBase64; }; r.readAsDataURL(i.files[0]); }
+    window.toggleMapButton = (val) => { document.getElementById('btn-open-map').style.display = (val && val.trim() !== "") ? "flex" : "none"; }
+    window.openExternalMap = () => { const url = document.getElementById('edit-map-code').value; if(url) window.open(url.startsWith('http') ? url : 'https://' + url, '_blank'); }
+    window.addUrlField = (v = '') => {
+        const c = document.getElementById('urls-container');
+        const d = document.createElement('div');
+        d.className = 'url-group';
+        d.innerHTML = `<input type="url" class="trip-url" value="${v}" style="flex:1"><button class="btn-action" style="background:var(--primary)" onclick="window.open(this.previousSibling.previousSibling.value.startsWith('http') ? this.previousSibling.previousSibling.value : 'https://' + this.previousSibling.previousSibling.value)">➜</button><button class="btn-action" style="background:var(--danger)" onclick="this.parentElement.remove()">✕</button><button class="btn-action" style="background:var(--success)" onclick="addUrlField()">+</button>`;
+        c.appendChild(d);
+    }
+
+    window.exportJSON = function() {
+        const cleanExport = trips.map(({firebaseId, ...rest}) => rest);
+        const b = new Blob([JSON.stringify(cleanExport, null, 2)], {type:"application/json"});
         const a = document.createElement("a");
-        a.href=URL.createObjectURL(b);
-        a.download="mis-rutas-cloud.json";
+        a.href = URL.createObjectURL(b);
+        a.download = "mis-rutas-cloud.json";
         a.click();
     }
 
-    function importJSON(input) {
+    window.importToFirebase = function(input) {
         const r = new FileReader();
         r.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                if(confirm("¿Sobrescribir Firebase con estos datos?")) {
-                    db.ref('rutas').set(imported);
+                if(confirm(`¿Subir ${imported.length} rutas a la nube?`)) {
+                    imported.forEach(trip => push(tripsRef, trip));
                 }
-            } catch(i){ alert("Error de formato"); }
+            } catch(err){ alert("Error de formato"); }
         };
         r.readAsText(input.files[0]);
     }
